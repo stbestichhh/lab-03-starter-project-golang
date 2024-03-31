@@ -1,4 +1,4 @@
-FROM golang:latest
+FROM golang:latest AS build
 
 WORKDIR /fizzbuzz
 
@@ -12,6 +12,11 @@ COPY lib ./lib
 COPY templates ./templates
 COPY main.go .
 
-RUN go build -o ./fizzbuzz
+RUN CGO_ENABLED=0 go build -o ./fizzbuzz
 
-CMD ["./fizzbuzz", "serve"]
+FROM scratch
+
+COPY --from=build /fizzbuzz/fizzbuzz /fizzbuzz
+COPY templates /templates
+
+CMD ["/fizzbuzz", "serve"]
